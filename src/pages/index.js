@@ -1,9 +1,9 @@
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 const inter = Inter({ subsets: ['latin'] })
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableColumn } from '@nextui-org/react'
+import Link from 'next/link'
 
 export default function Home() {
   const [books, setBooks] = useState([])
@@ -20,7 +20,6 @@ export default function Home() {
       })
   }, [])
 
-  useEffect(() => {
     const deleteBook = (isbn) => {
       axios
         .delete(`http://localhost:8080/api/${isbn}`)
@@ -32,7 +31,6 @@ export default function Home() {
           console.error(error)
         })
     }
-  }, [])
 
   return (
     <main
@@ -51,7 +49,7 @@ export default function Home() {
           </TableHeader>
           <TableBody>
             {Object.values(books).map((book) => (
-              <TableRow key={book.id}>
+              <TableRow key={book.isbn}>
                 <TableCell className='text-center'>{book.isbn}</TableCell>
                 <TableCell className='text-center'>{book.title}</TableCell>
                 <TableCell className='text-center'>{book.name}</TableCell>
@@ -59,6 +57,11 @@ export default function Home() {
                 <TableCell className='text-center'>{book.price}</TableCell>
                 <TableCell className='text-center'>{book.stok}</TableCell>
                 <TableCell className='text-center'>
+                  <button className='bg-blue-500 text-white font-bold py-2 px-4 rounded'>
+                    <Link href={'/detail/[book.isbn]'} as={`/detail/${book.isbn}`}>
+                      Detail
+                    </Link>
+                  </button>
                   <button
                     className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
                     onClick={() => deleteBook(book.isbn)}
