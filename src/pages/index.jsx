@@ -4,9 +4,11 @@ import axios from 'axios'
 const inter = Inter({ subsets: ['latin'] })
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableColumn } from '@nextui-org/react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export default function Home() {
   const [books, setBooks] = useState([])
+  const router = useRouter()
 
   useEffect(() => {
     axios
@@ -20,23 +22,30 @@ export default function Home() {
       })
   }, [])
 
-    const deleteBook = (isbn) => {
-      axios
-        .delete(`http://localhost:8080/api/${isbn}`)
-        .then((result) => {
-          console.log(result.data)
-          setBooks(result.data)
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+    const deleteBook = async (isbn) => {
+      try {
+        const res = await axios.delete(`http://localhost:8080/api/${isbn}`)
+        
+        if(res.data.errors){
+          console.log('gagal nih!')
+        } else {
+          console.log('berhasil nih!')
+          router.push('/')
+        }
+      } catch (error) {
+        console.error(error)
+      }  
     }
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex max-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
     >
-      <div className='max-w-full'>
+      <p className='text-xl font-bold'>Bookorama</p>
+      <div className='max-w-full text-end'>
+        <button className='bg-green-500 hover:bg-green-700 rounded text-white font-bold py-2 px-4 mb-3'>
+          <Link href='/tambah'>Tambah</Link>
+        </button>
         <Table>
           <TableHeader>
             <TableColumn className='text-center'>ISBN</TableColumn>
@@ -57,17 +66,19 @@ export default function Home() {
                 <TableCell className='text-center'>{book.price}</TableCell>
                 <TableCell className='text-center'>{book.stok}</TableCell>
                 <TableCell className='text-center'>
-                  <button className='bg-blue-500 text-white font-bold py-2 px-4 rounded'>
-                    <Link href={'/detail/[book.isbn]'} as={`/detail/${book.isbn}`}>
-                      Detail
-                    </Link>
-                  </button>
-                  <button
-                    className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
-                    onClick={() => deleteBook(book.isbn)}
-                  >
-                    Delete
-                  </button>
+                  <div className='flex gap-3'>
+                    <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded gap-3'>
+                      <Link href={'/detail/[book.isbn]'} as={`/detail/${book.isbn}`}>
+                        Detail
+                      </Link>
+                    </button>
+                    <button
+                      className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded gap-3'
+                      onClick={() => deleteBook(book.isbn)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
